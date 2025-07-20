@@ -1,0 +1,6 @@
+# Daftar domain yang akan dikecualikan (whitelist).
+# Domain yang tercantum di sini akan dihapus dari file hosts final.
+# Tambahkan satu domain per baris.
+# Contoh:
+# example.com
+# anotherexample.org

@@ -4,6 +4,7 @@ hostpress
 # File sementara
 hosts.raw
 hosts.combined
+hosts.temp
 
 # File hasil akhir (akan diunggah sebagai rilis)
 hosts

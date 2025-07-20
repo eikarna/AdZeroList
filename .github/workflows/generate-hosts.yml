@@ -26,8 +26,9 @@ jobs:
 
       - name: Download host sources
         run: |
-          echo "INFO: Downloading from sources in sources.list..."
-          wget -i sources.list -O hosts.raw
+          echo "INFO: Downloading from active sources in sources.list..."
+          # Filter baris yang diawali '#' atau baris kosong, lalu unduh
+          grep -vE '^\s*#|^\s' sources.list | wget -i - -O hosts.raw
           echo "INFO: Download complete."
 
       - name: Add custom domains
@@ -35,8 +36,8 @@ jobs:
           echo "INFO: Adding custom domains from custom.list..."
           if [ -s custom.list ]; then
             while IFS= read -r domain; do
-              # Pastikan baris tidak kosong
-              if [ -n "$domain" ]; then
+              # Pastikan baris tidak kosong dan bukan komentar
+              if [[ -n "$domain" && ! "$domain" =~ ^\s*# ]]; then
                 echo "0.0.0.0 $domain" >> hosts.raw
               fi
             done < custom.list
@@ -48,13 +49,26 @@ jobs:
       - name: Run hostpress to compress and de-duplicate
         run: |
           echo "INFO: Starting compression process..."
-          ./hostpress hosts.raw hosts
+          ./hostpress hosts.raw hosts.temp
           echo "INFO: Compression finished."
+
+      - name: Apply whitelist
+        run: |
+          echo "INFO: Applying whitelist from custom-white.list..."
+          if [ -s custom-white.list ]; then
+            # Hapus baris yang mengandung domain dari whitelist
+            # Opsi -f membaca pola dari file, -v membalikkan pencocokan
+            grep -v -f custom-white.list hosts.temp > hosts
+            echo "INFO: Whitelist applied."
+          else
+            echo "INFO: custom-white.list is empty. Skipping."
+            mv hosts.temp hosts
+          fi
           echo "INFO: Total lines in final hosts file:"
           wc -l hosts
 
       - name: Create Release and Upload Asset
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: hosts
           tag_name: build-${{ github.run_number }}-${{ github.sha }}
@@ -63,4 +77,4 @@ jobs:
             Triggered by: ${{ github.event_name }}
             Commit: `${{ github.sha }}`
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
