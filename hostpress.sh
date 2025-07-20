@@ -21,28 +21,35 @@ echo "INFO: Memulai proses dengan skrip Bash..."
 # - Menggunakan awk untuk logika yang lebih kuat untuk memvalidasi setiap baris.
 TEMP_NORMALIZED=$(mktemp)
 echo "INFO: Mem-parsing dan menormalkan entri dengan validasi ketat..."
+# Logika AWK yang diperkuat:
+# 1. Hanya proses baris yang tidak diawali '#' atau kosong.
+# 2. Pastikan kolom pertama ($1) adalah IP yang valid.
+# 3. Untuk setiap host (kolom >= 2):
+#    a. Lewati jika itu adalah komentar '#'.
+#    b. Terapkan validasi nama domain yang ketat sesuai RFC.
 awk '
-# Lewati baris komentar atau baris kosong
-!/^\s*#/ && NF > 1 {
-    ip = $1
-    # Validasi dasar untuk memastikan kolom pertama adalah IP.
-    # Ini akan menyaring baris header yang tidak valid.
-    if (ip ~ /^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$/ || ip ~ /^::1?$/) {
-        # Ulangi untuk setiap kolom setelah IP
-        for (i = 2; i <= NF; i++) {
-            host = $i
-            # Jika kita menemukan komentar di tengah baris, hentikan pemrosesan baris ini
-            if (substr(host, 1, 1) == "#") {
-                break
-            }
-            # Validasi nama host: tolak jika mengandung karakter yang tidak diizinkan.
-            # Ini adalah perbaikan utama untuk bug yang dilaporkan.
-            if (host !~ /["()\/]/) {
-                print ip, host
+    !/^\s*(#|$)/ {
+        ip = $1
+        # Validasi IP sederhana: harus mengandung setidaknya satu titik (untuk IPv4) atau titik dua (untuk IPv6)
+        # dan tidak boleh lebih dari 45 karakter (panjang maks IPv6).
+        if ((index(ip, ".") || index(ip, ":")) && length(ip) < 46) {
+            for (i = 2; i <= NF; i++) {
+                host = $i
+                # Lewati komentar di tengah baris
+                if (substr(host, 1, 1) == "#") {
+                    break
+                }
+                # Validasi Hostname (RFC 952/1123):
+                # - Hanya boleh berisi huruf, angka, dan tanda hubung.
+                # - Tidak boleh diawali atau diakhiri dengan tanda hubung atau titik.
+                # - Panjang total tidak lebih dari 253 karakter.
+                if (length(host) < 254 && host ~ /^[a-zA-Z0-9][a-zA-Z0-9.-]*[a-zA-Z0-9]$/) {
+                    print ip, host
+                }
             }
         }
     }
-}' "$INPUT_FILE" > "$TEMP_NORMALIZED"
+' "$INPUT_FILE" > "$TEMP_NORMALIZED"
 
 # --- Tahap 2: Sortir dan De-duplikasi ---
 # - Mengurutkan entri dan menghapus duplikat secara bersamaan.
@@ -59,8 +66,8 @@ awk -v max_hosts="$MAX_HOSTS_PER_LINE" '
     if (current_ip != "" && ($1 != current_ip || host_count >= max_hosts)) {
         # Tulis baris yang sudah dikompres
         printf "%s", current_ip;
-        for (i = 1; i <= host_count; i++) {
-            printf " %s", hosts[i];
+        for (j = 1; j <= host_count; j++) {
+            printf " %s", hosts[j];
         }
         printf "\n";
         
@@ -77,8 +84,8 @@ END {
     # Jangan lupa tulis sisa host di buffer terakhir
     if (host_count > 0) {
         printf "%s", current_ip;
-        for (i = 1; i <= host_count; i++) {
-            printf " %s", hosts[i];
+        for (j = 1; j <= host_count; j++) {
+            printf " %s", hosts[j];
         }
         printf "\n";
     }
