@@ -29,13 +29,15 @@ jobs:
         run: |
           echo "INFO: Downloading from active sources in sources.list..."
           # Filter baris yang diawali '#' atau baris kosong, lalu unduh
-          grep -vE '^\s*#|^\s' sources.list | wget -i - -O hosts.raw
+          grep -vE '^\s*(#|$)' sources.list | wget -i - -O hosts.raw
           echo "INFO: Download complete."
 
       - name: Add custom domains
         run: |
           echo "INFO: Adding custom domains from custom.list..."
           if [ -s custom.list ]; then
+            # FIX: Pastikan ada baris baru sebelum menambahkan domain kustom
+            echo "" >> hosts.raw
             while IFS= read -r domain; do
               # Pastikan baris tidak kosong dan bukan komentar
               if [[ -n "$domain" && ! "$domain" =~ ^\s*# ]]; then
