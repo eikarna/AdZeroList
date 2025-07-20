@@ -69,7 +69,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: hosts
-          tag_name: build-${{ github.run_number }}-${{ github.sha }}
+          # tag_name: build-${{ github.run_number }}-${{ github.sha }}
+          tag_name: latest
           body: |
             Automated hosts file build.
             Triggered by: ${{ github.event_name }}

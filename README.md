@@ -43,6 +43,8 @@ Daftar ini diambil dari `sources.list`:
 - [AdAway](https://adaway.org/hosts.txt)
 - [badmojr/1Hosts (Lite)](https://raw.githubusercontent.com/badmojr/1Hosts/master/Lite/hosts.txt)
 - [hagezi/dns-blocklists (Pro Compressed)](https://raw.githubusercontent.com/hagezi/dns-blocklists/main/hosts/pro-compressed.txt)
+- [AdGuardDNS (unofficial)](https://raw.githubusercontent.com/r-a-y/mobile-hosts/master/AdguardDNS.txt)
+- [GoodbyeAds](https://raw.githubusercontent.com/jerryn70/GoodbyeAds/master/Hosts/GoodbyeAds.txt)
 
 ---
 *Dibuat dengan bantuan Gemini.*
