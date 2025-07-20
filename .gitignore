@@ -1,0 +1,9 @@
+# File hasil kompilasi
+hostpress
+
+# File sementara
+hosts.raw
+hosts.combined
+
+# File hasil akhir (akan diunggah sebagai rilis)
+hosts

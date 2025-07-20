@@ -1,0 +1,6 @@
+# Daftar URL sumber hosts.
+# Tambahkan URL baru di sini, satu per baris.
+https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling/hosts
+https://adaway.org/hosts.txt
+https://raw.githubusercontent.com/badmojr/1Hosts/master/Lite/hosts.txt
+https://raw.githubusercontent.com/hagezi/dns-blocklists/main/hosts/pro-compressed.txt

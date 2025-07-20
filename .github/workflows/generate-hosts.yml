@@ -1,0 +1,66 @@
+name: Generate Compressed Hosts File
+
+on:
+  push:
+    branches: [ "main" ]
+  schedule:
+    # Jalankan setiap hari jam 00:00 UTC
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential wget
+
+      - name: Compile hostpress
+        run: make
+
+      - name: Download host sources
+        run: |
+          echo "INFO: Downloading from sources in sources.list..."
+          wget -i sources.list -O hosts.raw
+          echo "INFO: Download complete."
+
+      - name: Add custom domains
+        run: |
+          echo "INFO: Adding custom domains from custom.list..."
+          if [ -s custom.list ]; then
+            while IFS= read -r domain; do
+              # Pastikan baris tidak kosong
+              if [ -n "$domain" ]; then
+                echo "0.0.0.0 $domain" >> hosts.raw
+              fi
+            done < custom.list
+            echo "INFO: Custom domains added."
+          else
+            echo "INFO: custom.list is empty. Skipping."
+          fi
+
+      - name: Run hostpress to compress and de-duplicate
+        run: |
+          echo "INFO: Starting compression process..."
+          ./hostpress hosts.raw hosts
+          echo "INFO: Compression finished."
+          echo "INFO: Total lines in final hosts file:"
+          wc -l hosts
+
+      - name: Create Release and Upload Asset
+        uses: softprops/action-gh-release@v1
+        with:
+          files: hosts
+          tag_name: build-${{ github.run_number }}-${{ github.sha }}
+          body: |
+            Automated hosts file build.
+            Triggered by: ${{ github.event_name }}
+            Commit: `${{ github.sha }}`
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

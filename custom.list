@@ -1,0 +1,4 @@
+# Daftar domain kustom untuk diblokir.
+# Tambahkan domain baru di sini, satu per baris.
+analytics.s3.amazonaws.com
+events3alt.adcolony.com
