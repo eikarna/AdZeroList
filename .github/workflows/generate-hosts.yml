@@ -17,14 +17,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Environment
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential wget
-
-      - name: Compile hostpress
-        run: make
-
       - name: Download host sources
         run: |
           echo "INFO: Downloading from active sources in sources.list..."
@@ -49,10 +41,13 @@ jobs:
             echo "INFO: custom.list is empty. Skipping."
           fi
 
-      - name: Run hostpress to compress and de-duplicate
+      - name: Make script executable
+        run: chmod +x hostpress.sh
+
+      - name: Run hostpress script to compress and de-duplicate
         run: |
-          echo "INFO: Starting compression process..."
-          ./hostpress hosts.raw hosts.temp
+          echo "INFO: Starting compression process with Bash script..."
+          ./hostpress.sh hosts.raw hosts.temp
           echo "INFO: Compression finished."
 
       - name: Apply whitelist
@@ -71,7 +66,6 @@ jobs:
           wc -l hosts
 
       - name: Create Release and Upload Asset
-        # Gunakan versi v1 yang lebih stabil dan umum
         uses: softprops/action-gh-release@v2
         with:
           files: hosts
