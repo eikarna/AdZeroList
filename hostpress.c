@@ -65,6 +65,12 @@ int main(int argc, char *argv[]) {
         if (!ip) {
             continue;
         }
+        
+        // PENCEGAHAN: Lewati baris jika token di posisi IP terlalu panjang
+        if (strlen(ip) >= IP_ADDRESS_MAX_LENGTH) {
+            fprintf(stderr, "WARN: Melewati token yang terlalu panjang di posisi IP: %.50s...\n", ip);
+            continue;
+        }
 
         char *host;
         while ((host = strtok(NULL, " \t\n\r"))) {
@@ -138,8 +144,9 @@ int main(int argc, char *argv[]) {
         char *host_buffer[MAX_HOSTS_PER_LINE];
         int host_count_in_buffer = 0;
 
-        // Inisialisasi dengan entri pertama
-        strcpy(current_ip, entries[0].ip);
+        // Inisialisasi dengan entri pertama (menggunakan strncpy yang aman)
+        strncpy(current_ip, entries[0].ip, IP_ADDRESS_MAX_LENGTH - 1);
+        current_ip[IP_ADDRESS_MAX_LENGTH - 1] = '\0';
         host_buffer[host_count_in_buffer++] = entries[0].host;
 
         for (size_t i = 1; i < entry_count; i++) {
@@ -156,8 +163,9 @@ int main(int argc, char *argv[]) {
                 }
                 fprintf(outfile, "\n");
 
-                // Reset buffer
-                strcpy(current_ip, entries[i].ip);
+                // Reset buffer (menggunakan strncpy yang aman)
+                strncpy(current_ip, entries[i].ip, IP_ADDRESS_MAX_LENGTH - 1);
+                current_ip[IP_ADDRESS_MAX_LENGTH - 1] = '\0';
                 host_count_in_buffer = 0;
             }
 
