@@ -44,32 +44,33 @@ jobs:
       - name: Make script executable
         run: chmod +x hostpress.sh
 
-      - name: Run hostpress script to compress and de-duplicate
+      - name: Apply whitelist to raw hosts
         run: |
-          echo "INFO: Starting compression process with Bash script..."
-          ./hostpress.sh hosts.raw hosts.temp
-          echo "INFO: Compression finished."
-
-      - name: Apply whitelist
-        run: |
-          echo "INFO: Applying whitelist from custom-white.list..."
+          echo "INFO: Applying whitelist from custom-white.list to hosts.raw..."
           if [ -s custom-white.list ]; then
             # Hapus baris yang mengandung domain dari whitelist
             # Opsi -f membaca pola dari file, -v membalikkan pencocokan
-            grep -v -f custom-white.list hosts.temp > hosts
-            echo "INFO: Whitelist applied."
+            grep -v -f custom-white.list hosts.raw > hosts.raw.whitelisted
+            mv hosts.raw.whitelisted hosts.raw
+            echo "INFO: Whitelist applied to hosts.raw."
           else
-            echo "INFO: custom-white.list is empty. Skipping."
-            mv hosts.temp hosts
+            echo "INFO: custom-white.list is empty. Skipping whitelist application."
           fi
-          echo "INFO: Total lines in final hosts file:"
-          wc -l hosts
 
-      - name: Create Release and Upload Asset
+      - name: Run hostpress script to process hosts
+        run: |
+          echo "INFO: Starting host processing with Bash script..."
+          ./hostpress.sh hosts.raw
+          echo "INFO: Host processing finished. Generated multiple output files."
+
+      - name: Create Release and Upload Assets
         uses: softprops/action-gh-release@v2
         with:
-          files: hosts
-          # tag_name: build-${{ github.run_number }}-${{ github.sha }}
+          files: |
+            hosts.txt
+            hosts-uncompressed.txt
+            dnsmasq.conf
+            smartdns.conf
           tag_name: latest
           body: |
             Automated hosts file build.
