@@ -1,0 +1,6 @@
+# List of domains to be excluded (whitelist).
+# Domains listed here will be removed from the final hosts file.
+# Add one domain per line.
+# Example:
+# example.com
+# anotherexample.org

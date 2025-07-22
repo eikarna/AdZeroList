@@ -1,44 +1,44 @@
-# AutoHosts Generator
+# AdZeroList: Automated Hosts File Generator
 
-Repositori ini secara otomatis menghasilkan file `hosts` yang bersih, terkompresi, dan bebas duplikasi dari berbagai sumber. Proses ini dijalankan setiap hari oleh GitHub Actions untuk memastikan file `hosts` selalu yang terbaru.
+This repository automatically generates clean, compressed, and deduplicated `hosts` files from various sources. This process is run daily by GitHub Actions to ensure the `hosts` file is always up-to-date.
 
-## ✨ Fitur
+## ✨ Features
 
-- **Otomatis**: Dijalankan setiap hari, tidak perlu intervensi manual.
-- **Efisien**: Menggabungkan beberapa host ke dalam satu baris (1 IP untuk 8 domain) untuk mengurangi ukuran file.
-- **Bebas Duplikasi**: Memastikan tidak ada entri host yang berulang.
-- **Fleksibel**: Mudah untuk menambah atau mengubah sumber `hosts` hanya dengan mengedit file `sources.list`.
-- **Kustomisasi**: Mudah untuk menambahkan domain kustom (`custom.list`) atau mengecualikannya (`custom-white.list`).
+- **Automated**: Runs daily, no manual intervention needed.
+- **Efficient**: Combines multiple hosts into a single line (1 IP for 8 domains) to reduce file size.
+- **Deduplicated**: Ensures no duplicate host entries.
+- **Flexible**: Easy to add or change `hosts` sources by simply editing the `sources.list` file.
+- **Customizable**: Easy to add custom domains (`custom.list`) or exclude them (`custom-white.list`).
 
-## 🚀 Penggunaan
+## 🚀 Usage
 
-File `hosts` yang sudah jadi dapat diunduh dari halaman **[Releases](https://github.com/eikarna/autohosts/releases)** di repositori ini.
+The generated `hosts` file can be downloaded from the **[Releases](https://github.com/eikarna/autohosts/releases)** page of this repository.
 
-Setiap rilis akan diberi tag dengan nomor build dan hash commit untuk pelacakan.
+Each release will be tagged with a build number and commit hash for tracking.
 
-## 🔧 Cara Kerja
+## 🔧 How It Works
 
-1.  **Trigger**: GitHub Actions dijalankan setiap hari pada pukul 00:00 UTC, atau setiap kali ada `push` ke branch `main`.
-2.  **Kompilasi**: Skrip mengkompilasi `hostpress.c` menggunakan `Makefile`.
-3.  **Unduh**: Semua URL aktif (tidak dikomentari) dari `sources.list` diunduh.
-4.  **Kustomisasi**: Semua domain dari `custom.list` ditambahkan ke daftar blokir.
-5.  **Proses**: Program `hostpress` dijalankan untuk membersihkan, mengurutkan, menghilangkan duplikasi, dan mengkompres semua entri.
-6.  **Whitelist**: Domain yang ada di `custom-white.list` dihapus dari file hosts yang sudah diproses.
-7.  **Rilis**: File `hosts` final diunggah sebagai aset ke rilis baru di GitHub.
+1.  **Trigger**: GitHub Actions runs daily at 00:00 UTC, or whenever there is a `push` to the `main` branch.
+2.  **Compilation**: The script compiles `hostpress.c` using `Makefile`.
+3.  **Download**: All active (uncommented) URLs from `sources.list` are downloaded.
+4.  **Customization**: All domains from `custom.list` are added to the blocklist.
+5.  **Process**: The `hostpress` program is run to clean, sort, deduplicate, and compress all entries.
+6.  **Whitelist**: Domains present in `custom-white.list` are removed from the processed hosts file.
+7.  **Release**: The final `hosts` file is uploaded as an asset to a new release on GitHub.
 
-## 💻 Kustomisasi
+## 💻 Customization
 
-Untuk mengubah daftar blokir:
+To modify the blocklist:
 
--   **Menambah/Mengubah Sumber**: Edit file `sources.list`. Tambahkan atau hapus URL (satu per baris). Anda bisa menonaktifkan sebuah sumber untuk sementara dengan memberinya komentar (`#`).
--   **Menambah Domain Blokir Kustom**: Edit file `custom.list`. Tambahkan domain yang ingin Anda blokir (satu per baris).
--   **Mengecualikan Domain (Whitelist)**: Edit file `custom-white.list`. Tambahkan domain yang tidak ingin Anda blokir (satu per baris).
+-   **Add/Change Sources**: Edit the `sources.list` file. Add or remove URLs (one per line). You can temporarily disable a source by commenting it out (`#`).
+-   **Add Custom Blocked Domains**: Edit the `custom.list` file. Add domains you want to block (one per line).
+-   **Exclude Domains (Whitelist)**: Edit the `custom-white.list` file. Add domains you do not want to block (one per line).
 
-Perubahan Anda akan secara otomatis memicu build baru setelah Anda melakukan `push` ke branch `main`.
+Your changes will automatically trigger a new build after you `push` to the `main` branch.
 
-## 📜 Sumber Hosts Saat Ini
+## 📜 Current Host Sources
 
-Daftar ini diambil dari `sources.list`:
+This list is taken from `sources.list`:
 - [StevenBlack/hosts](https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling/hosts)
 - [AdAway](https://adaway.org/hosts.txt)
 - [badmojr/1Hosts (Lite)](https://raw.githubusercontent.com/badmojr/1Hosts/master/Lite/hosts.txt)
@@ -47,4 +47,4 @@ Daftar ini diambil dari `sources.list`:
 - [GoodbyeAds](https://raw.githubusercontent.com/jerryn70/GoodbyeAds/master/Hosts/GoodbyeAds.txt)
 
 ---
-*Dibuat dengan bantuan Gemini.*
+*Created with the help of Gemini.*

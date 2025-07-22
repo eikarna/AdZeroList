@@ -1,0 +1,4 @@
+# List of custom domains to block.
+# Add new domains here, one per line.
+analytics.s3.amazonaws.com
+events3alt.adcolony.com
