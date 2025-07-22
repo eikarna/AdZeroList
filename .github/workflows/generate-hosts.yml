@@ -4,8 +4,8 @@ on:
   push:
     branches: [ "main" ]
   schedule:
-    # Run daily at 00:00 UTC
-    - cron: "0 0 * * *"
+    # Run for every 3 hours
+    - cron: "0 */3 * * *"
   workflow_dispatch:
 
 jobs:
@@ -62,9 +62,25 @@ jobs:
           ./scripts/hostpress.sh hosts.raw
           echo "INFO: Host processing finished. Generated multiple output files."
 
+      - name: Get previous hosts.txt hash
+        id: old_hash
+        run: |
+          OLD_HASH=$(git show HEAD~1:hosts.txt 2>/dev/null | sha256sum | awk '{print $1}')
+          if [ -z "$OLD_HASH" ]; then
+            echo "::set-output name=value::N/A (first run or hosts.txt not in previous commit)"
+          else
+            echo "::set-output name=value::$OLD_HASH"
+          fi
+
+      - name: Get new hosts.txt hash
+        id: new_hash
+        run: |
+          NEW_HASH=$(sha256sum hosts.txt | awk '{print $1}')
+          echo "::set-output name=value::$NEW_HASH"
+
       - name: Get current date
         id: date
-        run: echo "::set-output name=date::$(date +'Latest - %H:%M (%d %m %Y)')"
+        run: echo "::set-output name=date::$(date +'AZL - %H:%M:%S %Z (%A, %d %b %Y)')"
       - name: Create Release and Upload Assets
         uses: softprops/action-gh-release@v2
         with:
@@ -79,5 +95,9 @@ jobs:
             Automated hosts file build.
             Triggered by: ${{ github.event_name }}
             Commit: `${{ github.sha }}`
+            ---
+            hosts.txt Hashes:
+            Old: ${{ steps.old_hash.outputs.value }}
+            New: ${{ steps.new_hash.outputs.value }}
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
