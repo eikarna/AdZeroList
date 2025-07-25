@@ -20,6 +20,8 @@ OUTPUT_UNCOMPRESSED="hosts-uncompressed.txt"
 OUTPUT_COMPRESSED="hosts.txt"
 OUTPUT_DNSMASQ="dnsmasq.conf"
 OUTPUT_SMARTDNS="smartdns.conf"
+OUTPUT_ADBLOCK="adblock.txt"
+OUTPUT_UBLOCK="ublock.txt"
 
 echo "INFO: Starting process with Bash script..."
 
@@ -103,6 +105,31 @@ END {
         printf "\n";
     }
 }' "$TEMP_UNIQUE" > "$OUTPUT_COMPRESSED"
+
+# 3e: AdBlock Plus/Brave/Generic Adblocker Format
+echo "INFO: Generating AdBlock format -> $OUTPUT_ADBLOCK"
+{
+    echo "! Title: AdZeroList - AdBlock Format"
+    echo "! Description: Automatically generated blocklist in AdBlock Plus format"
+    echo "! Homepage: https://github.com/eikarna/AdZeroList"
+    echo "! Expires: 1 day"
+    echo "! Version: $(date +%Y%m%d%H%M%S)"
+    echo "!"
+    awk '{print "||"$2"^"}' "$TEMP_UNIQUE"
+} > "$OUTPUT_ADBLOCK"
+
+# 3f: uBlock Origin Format (same as AdBlock but with additional metadata)
+echo "INFO: Generating uBlock Origin format -> $OUTPUT_UBLOCK"
+{
+    echo "! Title: AdZeroList - uBlock Origin Format"
+    echo "! Description: Automatically generated blocklist optimized for uBlock Origin"
+    echo "! Homepage: https://github.com/eikarna/AdZeroList"
+    echo "! Expires: 1 day"
+    echo "! Version: $(date +%Y%m%d%H%M%S)"
+    echo "! License: https://github.com/eikarna/AdZeroList/blob/main/LICENSE"
+    echo "!"
+    awk '{print "||"$2"^"}' "$TEMP_UNIQUE"
+} > "$OUTPUT_UBLOCK"
 
 rm "$TEMP_UNIQUE"
 

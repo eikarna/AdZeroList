@@ -89,6 +89,8 @@ jobs:
             hosts-uncompressed.txt
             dnsmasq.conf
             smartdns.conf
+            adblock.txt
+            ublock.txt
           tag_name: latest
           name: ${{ steps.date.outputs.date }}
           body: |

@@ -8,6 +8,7 @@ Welcome to **AdZeroList**! This repository is your go-to solution for automatica
 ## ✨ Features
 
 -   **Automated & Always Fresh**: Our `hosts` files are automatically generated daily via GitHub Actions, ensuring you always have the latest blocklist without any manual intervention.
+-   **Multiple Format Support**: Generate blocklists in various formats including traditional `hosts` files, dnsmasq, smartdns, and adblocker formats (AdBlock Plus, uBlock Origin, Brave).
 -   **Highly Efficient**: We optimize `hosts` files by combining multiple host entries into a single line (1 IP for up to 8 domains), significantly reducing file size and improving performance.
 -   **Deduplicated & Clean**: Say goodbye to redundant entries! Our process meticulously deduplicates all host entries, providing you with a clean and efficient blocklist.
 -   **Flexible Source Management**: Easily manage your `hosts` sources by simply editing the `sources.list` file. Add, remove, or temporarily disable sources with ease.
@@ -15,7 +16,25 @@ Welcome to **AdZeroList**! This repository is your go-to solution for automatica
 
 ## 🚀 Usage
 
-Getting started with AdZeroList is simple! You can download the latest generated `hosts` file directly from our **[Releases page](https://github.com/eikarna/AdZeroList/releases)**.
+Getting started with AdZeroList is simple! You can download the latest generated files directly from our **[Releases page](https://github.com/eikarna/AdZeroList/releases)**.
+
+### Available Formats
+
+AdZeroList generates blocklists in multiple formats to support different applications:
+
+- **`hosts.txt`** - Traditional hosts file format (compressed, multiple domains per line)
+- **`hosts-uncompressed.txt`** - Traditional hosts file format (one domain per line)
+- **`dnsmasq.conf`** - Configuration file for dnsmasq DNS server
+- **`smartdns.conf`** - Configuration file for SmartDNS
+- **`adblock.txt`** - AdBlock Plus format (compatible with Brave, AdBlock Plus, and most browser extensions)
+- **`ublock.txt`** - uBlock Origin optimized format (enhanced metadata for uBlock Origin)
+
+### Browser Extension Usage
+
+For browser-based ad blockers:
+1. Download `adblock.txt` for general compatibility with AdBlock Plus, Brave, and similar extensions
+2. Download `ublock.txt` for optimal performance with uBlock Origin
+3. Add the downloaded file as a custom filter list in your adblocker settings
 
 Each release is tagged with a unique identifier and includes detailed information, such as the commit hash that triggered the build and the SHA256 hashes of the `hosts.txt` file, allowing you to verify its integrity and track changes.
 
@@ -36,7 +55,7 @@ This allows you to quickly see if the `hosts.txt` content has changed between re
 4.  **Customization**: Domains specified in `custom.list` are seamlessly integrated into the blocklist.
 5.  **Processing**: The `hostpress` program takes over, cleaning, sorting, deduplicating, and compressing all entries for optimal performance.
 6.  **Whitelisting**: Domains listed in `custom-white.list` are carefully removed from the processed `hosts` file, ensuring your essential services remain unaffected.
-7.  **Release**: The final, optimized `hosts` file, along with other formats, is uploaded as an asset to a new GitHub release.
+7.  **Release**: The final, optimized files in multiple formats (hosts, dnsmasq, smartdns, and adblocker formats) are uploaded as assets to a new GitHub release.
 
 ## 💻 Customization
 
