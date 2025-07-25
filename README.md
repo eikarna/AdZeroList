@@ -19,6 +19,25 @@ Welcome to **AdZeroList**! This repository is your go-to solution for automatica
 -   **Comprehensive Protection**: Blocks ads, trackers, malware, phishing, cryptomining, and annoying elements across all platforms.
 
 ## 🚀 Usage
+## 🔗 Direct Download Links (Recommended)
+
+**For better browser compatibility, use these direct links instead of GitHub releases:**
+
+### Browser Adblockers
+- **Brave Browser**: `https://raw.githubusercontent.com/eikarna/AdZeroList/main/outputs/adblock.txt`
+- **uBlock Origin**: `https://raw.githubusercontent.com/eikarna/AdZeroList/main/outputs/ublock.txt`
+
+### DNS Servers  
+- **Hosts format**: `https://raw.githubusercontent.com/eikarna/AdZeroList/main/outputs/hosts.txt`
+- **Hosts uncompressed**: `https://raw.githubusercontent.com/eikarna/AdZeroList/main/outputs/hosts-uncompressed.txt`
+- **Dnsmasq**: `https://raw.githubusercontent.com/eikarna/AdZeroList/main/outputs/dnsmasq.conf`
+- **SmartDNS**: `https://raw.githubusercontent.com/eikarna/AdZeroList/main/outputs/smartdns.conf`
+- **BIND RPZ**: `https://raw.githubusercontent.com/eikarna/AdZeroList/main/outputs/bind-rpz.conf`
+- **Blocky**: `https://raw.githubusercontent.com/eikarna/AdZeroList/main/outputs/blocky.yml`
+- **Unbound**: `https://raw.githubusercontent.com/eikarna/AdZeroList/main/outputs/unbound.conf`
+
+> **Note**: GitHub releases may have compatibility issues with some browsers/downloaders. The `raw.githubusercontent.com` links provide direct access without redirect issues.
+
 
 Getting started with AdZeroList is simple! You can download the latest generated files directly from our **[Releases page](https://github.com/eikarna/AdZeroList/releases)**.
 

@@ -1,170 +1,198 @@
 #!/bin/bash
 #
-# hostpress-enhanced.sh - Enhanced script to generate optimized blocklists for different formats
+# hostpress-enhanced.sh - Enhanced script for generating multiple blocklist formats
+# Compatible with GitHub Actions and various bash environments
 #
 
-set -e # Exit immediately if a command exits with a non-zero status.
+set -e
 
-# --- Configuration ---
-MAX_HOSTS_PER_LINE=9
+# Configuration
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+LISTS_DIR="$PROJECT_ROOT/lists"
 TEMP_DIR=$(mktemp -d)
+MAX_HOSTS_PER_LINE=9
+
+# Cleanup function
 trap 'rm -rf "$TEMP_DIR"' EXIT
 
-# --- Output File Names ---
+# Source lists
+DNS_SOURCES="$LISTS_DIR/sources-dns.list"
+ADBLOCK_SOURCES="$LISTS_DIR/sources-adblock.list" 
+LEGACY_SOURCES="$LISTS_DIR/sources.list"
+CUSTOM_DOMAINS="$LISTS_DIR/custom.list"
+CUSTOM_ADBLOCK="$LISTS_DIR/custom-adblock.list"
+CUSTOM_WHITE="$LISTS_DIR/custom-white.list"
+
+# Output files
 OUTPUT_UNCOMPRESSED="hosts-uncompressed.txt"
 OUTPUT_COMPRESSED="hosts.txt"
 OUTPUT_DNSMASQ="dnsmasq.conf"
 OUTPUT_SMARTDNS="smartdns.conf"
 OUTPUT_BIND="bind-rpz.conf"
-OUTPUT_BLOCKY="blocky.txt"
+OUTPUT_BLOCKY="blocky.yml"
 OUTPUT_UNBOUND="unbound.conf"
 OUTPUT_ADBLOCK="adblock.txt"
 OUTPUT_UBLOCK="ublock.txt"
 
-echo "INFO: Starting enhanced processing with format-specific optimization..."
+echo "🚀 Starting AdZeroList enhanced build process..."
+echo "📁 Working directory: $SCRIPT_DIR"
+echo "📁 Project root: $PROJECT_ROOT"
 
-# --- Function: Download and process DNS sources ---
-process_dns_sources() {
-    local output_file="$1"
-    echo "INFO: Processing DNS-level sources..."
+# Function to download with timeout and retry
+safe_download() {
+    local url="$1"
+    local output="$2"
+    local max_attempts=3
+    local timeout_duration=15
     
-    if [ -f "lists/sources-dns.list" ]; then
-        # Download DNS sources
-        grep -vE '^\s*(#|$)' lists/sources-dns.list | while read -r url; do
-            echo "INFO: Downloading DNS source: $url"
-            curl -s -L "$url" >> "$output_file" 2>/dev/null || wget -q -O - "$url" >> "$output_file" 2>/dev/null || echo "WARNING: Failed to download $url"
-        done
-    fi
-    
-    # Add legacy sources.list for backward compatibility
-    if [ -f "lists/sources.list" ]; then
-        echo "INFO: Adding legacy sources for backward compatibility..."
-        grep -vE '^\s*(#|$)' lists/sources.list | while read -r url; do
-            echo "INFO: Downloading legacy source: $url"
-            curl -s -L "$url" >> "$output_file" 2>/dev/null || wget -q -O - "$url" >> "$output_file" 2>/dev/null || echo "WARNING: Failed to download $url"
-        done
-    fi
-}
-
-# --- Function: Download and process AdBlock sources ---
-process_adblock_sources() {
-    local output_file="$1"
-    echo "INFO: Processing AdBlock-specific sources..."
-    
-    if [ -f "lists/sources-adblock.list" ]; then
-        grep -vE '^\s*(#|$)' lists/sources-adblock.list | while read -r url; do
-            echo "INFO: Downloading AdBlock source: $url"
-            curl -s -L "$url" >> "$output_file" 2>/dev/null || wget -q -O - "$url" >> "$output_file" 2>/dev/null || echo "WARNING: Failed to download $url"
-        done
-    fi
-}
-
-# --- Function: Process hosts format data ---
-process_hosts_data() {
-    local input_file="$1"
-    local output_file="$2"
-    
-    echo "INFO: Processing hosts format data..."
-    awk '
-        !/^\s*(#|$)/ {
-            ip = $1
-            if ((index(ip, ".") || index(ip, ":")) && length(ip) < 46) {
-                for (i = 2; i <= NF; i++) {
-                    host = tolower($i)
-                    if (substr(host, 1, 1) == "#") break
-                    
-                    # Exclude private/local domains
-                    if (host ~ /^(localhost|localhost\.domain)$/ || host ~ /\.local$|\.lan$|\.internal$/) continue
-                    
-                    # Hostname validation
-                    if (length(host) < 254 && host ~ /^[a-z0-9][a-z0-9.-]*[a-z0-9]$/) {
-                        print ip, host
-                    }
-                }
-            }
-        }
-    ' "$input_file" | sort -u > "$output_file"
-}
-
-# --- Function: Process AdBlock format data ---
-process_adblock_data() {
-    local input_file="$1"
-    local output_file="$2"
-    
-    echo "INFO: Processing AdBlock format data..."
-    awk '
-        # Skip comments and empty lines
-        /^\s*!/ || /^\s*$/ { next }
-        
-        # Process different AdBlock filter types
-        {
-            line = $0
-            
-            # Domain blocking rules (||domain.com^)
-            if (match(line, /\|\|([^\/\^\*\$]+)\^/)) {
-                domain = substr(line, RSTART+2, RLENGTH-3)
-                if (length(domain) > 0 && domain !~ /localhost|\.local$|\.lan$/) {
-                    print "||" tolower(domain) "^"
-                }
-            }
-            # Element hiding rules - keep as is for adblockers
-            else if (match(line, /^[^\/\*]*##/)) {
-                print line
-            }
-            # URL blocking rules - keep as is
-            else if (match(line, /^[\|\*]*https?:\/\//)) {
-                print line
-            }
-            # Simple domain rules
-            else if (match(line, /^([a-zA-Z0-9][a-zA-Z0-9\.-]*[a-zA-Z0-9])$/)) {
-                domain = $0
-                if (domain !~ /localhost|\.local$|\.lan$/) {
-                    print "||" tolower(domain) "^"
-                }
-            }
-        }
-    ' "$input_file" | sort -u > "$output_file"
-}
-
-# --- Main Processing ---
-
-# Process DNS sources
-DNS_RAW="$TEMP_DIR/dns.raw"
-touch "$DNS_RAW"
-process_dns_sources "$DNS_RAW"
-
-# Add custom domains to DNS sources
-if [ -s "lists/custom.list" ]; then
-    echo "INFO: Adding custom domains..."
-    while IFS= read -r domain; do
-        if [[ -n "$domain" && ! "$domain" =~ ^\s*# ]]; then
-            echo "0.0.0.0 $domain" >> "$DNS_RAW"
+    local attempt=1
+    while [ $attempt -le $max_attempts ]; do
+        echo "    Attempt $attempt/$max_attempts..."
+        if timeout $timeout_duration curl -fsSL --connect-timeout 5 --max-time 10 --retry 1 "$url" >> "$output" 2>/dev/null; then
+            return 0
         fi
-    done < lists/custom.list
+        if [ $attempt -lt $max_attempts ]; then
+            sleep 2
+        fi
+        attempt=$((attempt + 1))
+    done
+    return 1
+}
+
+# Function to process source lists
+process_sources() {
+    local source_file="$1"
+    local output_file="$2"
+    local source_type="$3"
+    
+    echo "DEBUG: Checking source file: $source_file"
+    
+    # Determine which source file to use
+    if [ ! -f "$source_file" ]; then
+        if [ "$source_type" = "DNS" ] && [ -f "$LEGACY_SOURCES" ]; then
+            echo "⚠️  $source_type sources not found, using legacy sources..."
+            source_file="$LEGACY_SOURCES"
+        else
+            echo "⚠️  No $source_type sources available, skipping..."
+            return 0
+        fi
+    fi
+    
+    echo "📥 Processing $source_type sources from $(basename "$source_file")..."
+    
+    local success_count=0
+    local total_count=0
+    
+    # Read URLs and download
+    while IFS= read -r url || [ -n "$url" ]; do
+        # Skip empty lines and comments
+        case "$url" in
+            ''|'#'*) continue ;;
+        esac
+        
+        total_count=$((total_count + 1))
+        echo "  📡 [$total_count] $url"
+        
+        if safe_download "$url" "$output_file"; then
+            echo "    ✅ Success"
+            success_count=$((success_count + 1))
+        else
+            echo "    ❌ Failed after retries"
+        fi
+    done < "$source_file"
+    
+    echo "  📊 Downloaded $success_count/$total_count sources successfully"
+    return 0
+}
+
+# Initialize temporary files
+TEMP_DNS="$TEMP_DIR/dns_raw.txt"
+TEMP_ADBLOCK="$TEMP_DIR/adblock_raw.txt"
+touch "$TEMP_DNS" "$TEMP_ADBLOCK"
+
+# Process sources
+echo ""
+echo "DEBUG: About to process DNS sources..."
+process_sources "$DNS_SOURCES" "$TEMP_DNS" "DNS"
+echo ""
+echo "DEBUG: About to process AdBlock sources..."
+process_sources "$ADBLOCK_SOURCES" "$TEMP_ADBLOCK" "AdBlock"
+
+# Add custom domains
+if [ -f "$CUSTOM_DOMAINS" ]; then
+    echo ""
+    echo "📝 Adding custom domains..."
+    while IFS= read -r domain || [ -n "$domain" ]; do
+        case "$domain" in
+            ''|'#'*) continue ;;
+        esac
+        echo "0.0.0.0 $domain" >> "$TEMP_DNS"
+        echo "  ✅ Added: $domain"
+    done < "$CUSTOM_DOMAINS"
 fi
 
-# Apply whitelist to DNS sources
-if [ -s "lists/custom-white.list" ]; then
-    echo "INFO: Applying whitelist to DNS sources..."
-    grep -v -f lists/custom-white.list "$DNS_RAW" > "$DNS_RAW.tmp" && mv "$DNS_RAW.tmp" "$DNS_RAW"
+# Process and normalize DNS data
+echo ""
+echo "🔄 Processing and normalizing DNS data..."
+TEMP_NORMALIZED="$TEMP_DIR/normalized.txt"
+
+awk '
+    !/^\s*(#|$|!)/ {
+        ip = $1
+        if ((index(ip, ".") || index(ip, ":")) && length(ip) < 46) {
+            for (i = 2; i <= NF; i++) {
+                host = tolower($i)
+                if (substr(host, 1, 1) == "#") break
+                
+                # Skip private/local domains
+                if (host ~ /^(localhost|localhost\.domain)$/ || host ~ /\.local$|\.lan$|\.internal$/) continue
+                
+                # Basic hostname validation
+                if (length(host) < 254 && host ~ /^[a-z0-9][a-z0-9.-]*[a-z0-9]$/) {
+                    print ip, host
+                }
+            }
+        }
+    }
+' "$TEMP_DNS" > "$TEMP_NORMALIZED"
+
+# Sort and deduplicate
+TEMP_UNIQUE="$TEMP_DIR/unique.txt"
+sort -u "$TEMP_NORMALIZED" > "$TEMP_UNIQUE"
+
+# Apply whitelist
+if [ -f "$CUSTOM_WHITE" ]; then
+    echo "🤍 Applying whitelist..."
+    TEMP_FILTERED="$TEMP_DIR/filtered.txt"
+    if grep -vFf "$CUSTOM_WHITE" "$TEMP_UNIQUE" > "$TEMP_FILTERED" 2>/dev/null; then
+        mv "$TEMP_FILTERED" "$TEMP_UNIQUE"
+        echo "  ✅ Whitelist applied"
+    else
+        echo "  ⚠️  Whitelist application failed, continuing without"
+    fi
 fi
 
-# Process hosts format data
-DNS_PROCESSED="$TEMP_DIR/dns.processed"
-process_hosts_data "$DNS_RAW" "$DNS_PROCESSED"
+DOMAIN_COUNT=$(wc -l < "$TEMP_UNIQUE")
+echo "📊 Total unique domains: $DOMAIN_COUNT"
 
-# Generate DNS-based formats (hosts, dnsmasq, smartdns)
-echo "INFO: Generating hosts formats..."
+# Generate DNS server formats
+echo ""
+echo "🏗️  Generating DNS server formats..."
 
-# Uncompressed hosts
-cp "$DNS_PROCESSED" "$OUTPUT_UNCOMPRESSED"
+# Hosts uncompressed
+echo "  📄 Generating hosts-uncompressed.txt..."
+cp "$TEMP_UNIQUE" "$OUTPUT_UNCOMPRESSED"
 
-# Compressed hosts
+# Hosts compressed
+echo "  📄 Generating hosts.txt (compressed)..."
 awk -v max_hosts="$MAX_HOSTS_PER_LINE" '
 {
     if (current_ip != "" && ($1 != current_ip || host_count >= max_hosts)) {
         printf "%s", current_ip;
-        for (j = 1; j <= host_count; j++) printf " %s", hosts[j];
+        for (j = 1; j <= host_count; j++) {
+            printf " %s", hosts[j];
+        }
         printf "\n";
         host_count = 0;
         delete hosts;
@@ -175,110 +203,124 @@ awk -v max_hosts="$MAX_HOSTS_PER_LINE" '
 END {
     if (host_count > 0) {
         printf "%s", current_ip;
-        for (j = 1; j <= host_count; j++) printf " %s", hosts[j];
+        for (j = 1; j <= host_count; j++) {
+            printf " %s", hosts[j];
+        }
         printf "\n";
     }
-}' "$DNS_PROCESSED" > "$OUTPUT_COMPRESSED"
+}' "$TEMP_UNIQUE" > "$OUTPUT_COMPRESSED"
 
-# Dnsmasq format
-awk '{print "address=/"$2"/"$1}' "$DNS_PROCESSED" > "$OUTPUT_DNSMASQ"
+# Dnsmasq
+echo "  📄 Generating dnsmasq.conf..."
+awk '{print "address=/"$2"/"$1}' "$TEMP_UNIQUE" > "$OUTPUT_DNSMASQ"
 
-# SmartDNS format
-awk '{print "address /"$2"/"$1}' "$DNS_PROCESSED" > "$OUTPUT_SMARTDNS"
+# SmartDNS
+echo "  📄 Generating smartdns.conf..."
+awk '{print "address /"$2"/"$1}' "$TEMP_UNIQUE" > "$OUTPUT_SMARTDNS"
 
-# BIND RPZ (Response Policy Zones) format
-echo "INFO: Generating BIND RPZ format..."
+# BIND RPZ
+echo "  📄 Generating bind-rpz.conf..."
 {
-    echo "; BIND Response Policy Zone configuration"
-    echo "; Generated by AdZeroList - $(date)"
-    echo "; Usage: Add this zone to your BIND configuration"
-    echo ";"
-    echo "\$TTL 300"
-    echo "@ IN SOA localhost. root.localhost. ("
-    echo "    $(date +%Y%m%d%H) ; Serial"
-    echo "    3600       ; Refresh"
-    echo "    1800       ; Retry"
-    echo "    604800     ; Expire"
-    echo "    300 )      ; Minimum TTL"
-    echo "@ IN NS localhost."
-    echo ";"
-    awk '{print $2 " CNAME ."}' "$DNS_PROCESSED"
+    echo "; AdZeroList BIND RPZ Zone"
+    echo "; Generated: $(date -u)"
+    echo "; Total domains: $DOMAIN_COUNT"
+    echo ""
+    awk '{print $2" CNAME ."}' "$TEMP_UNIQUE"
 } > "$OUTPUT_BIND"
 
-# Blocky format (Domain Wildcard)
-echo "INFO: Generating Blocky format..."
+# Blocky
+echo "  📄 Generating blocky.yml..."
 {
-    echo "# Blocky blacklist configuration"
-    echo "# Generated by AdZeroList - $(date)"
-    echo "# Usage: Add domains to your blocky blacklists configuration"
-    echo "#"
-    awk '{print $2}' "$DNS_PROCESSED"
+    echo "# AdZeroList Blocky Configuration"
+    echo "# Generated: $(date -u)"
+    echo "# Total domains: $DOMAIN_COUNT"
+    echo ""
+    echo "blocking:"
+    echo "  blackLists:"
+    echo "    ads:"
+    awk '{print "      - "$2}' "$TEMP_UNIQUE"
 } > "$OUTPUT_BLOCKY"
 
-# Unbound format
-echo "INFO: Generating Unbound format..."
+# Unbound
+echo "  📄 Generating unbound.conf..."
 {
-    echo "# Unbound configuration for ad blocking"
-    echo "# Generated by AdZeroList - $(date)"
-    echo "# Usage: Include this file in your unbound.conf"
-    echo "#"
-    awk '{print "local-zone: \"" $2 "\" static"}' "$DNS_PROCESSED"
+    echo "# AdZeroList Unbound Configuration"
+    echo "# Generated: $(date -u)"
+    echo "# Total domains: $DOMAIN_COUNT"
+    echo ""
+    awk '{print "local-zone: \""$2"\" static"}' "$TEMP_UNIQUE"
 } > "$OUTPUT_UNBOUND"
 
-# Process AdBlock sources
-ADBLOCK_RAW="$TEMP_DIR/adblock.raw"
-touch "$ADBLOCK_RAW"
-process_adblock_sources "$ADBLOCK_RAW"
+# Generate AdBlock formats
+echo ""
+echo "🏗️  Generating AdBlock formats..."
 
-# Add custom AdBlock filters
-if [ -s "lists/custom-adblock.list" ]; then
-    echo "INFO: Adding custom AdBlock filters..."
-    grep -vE '^\s*(#|$)' lists/custom-adblock.list >> "$ADBLOCK_RAW"
+# Process AdBlock sources
+TEMP_ADBLOCK_PROCESSED="$TEMP_DIR/adblock_processed.txt"
+
+# Start with DNS domains converted to AdBlock format
+awk '{print "||"$2"^"}' "$TEMP_UNIQUE" > "$TEMP_ADBLOCK_PROCESSED"
+
+# Add existing AdBlock rules if available
+if [ -f "$TEMP_ADBLOCK" ] && [ -s "$TEMP_ADBLOCK" ]; then
+    echo "  📝 Processing existing AdBlock rules..."
+    grep -E '^\|\|.*\^' "$TEMP_ADBLOCK" 2>/dev/null >> "$TEMP_ADBLOCK_PROCESSED" || true
 fi
 
-# Convert DNS domains to AdBlock format and merge
-awk '{print "||"$2"^"}' "$DNS_PROCESSED" >> "$ADBLOCK_RAW"
+# Add custom AdBlock filters
+if [ -f "$CUSTOM_ADBLOCK" ]; then
+    echo "  📝 Adding custom AdBlock filters..."
+    grep -v '^[[:space:]]*#' "$CUSTOM_ADBLOCK" 2>/dev/null >> "$TEMP_ADBLOCK_PROCESSED" || true
+fi
 
-# Process AdBlock data
-ADBLOCK_PROCESSED="$TEMP_DIR/adblock.processed"
-process_adblock_data "$ADBLOCK_RAW" "$ADBLOCK_PROCESSED"
+# Sort and deduplicate AdBlock rules
+sort -u "$TEMP_ADBLOCK_PROCESSED" -o "$TEMP_ADBLOCK_PROCESSED"
+ADBLOCK_COUNT=$(wc -l < "$TEMP_ADBLOCK_PROCESSED")
 
-# Generate AdBlock formats
-echo "INFO: Generating AdBlock formats..."
-
-# AdBlock Plus format
+# AdBlock Plus/Brave format
+echo "  📄 Generating adblock.txt..."
 {
     echo "! Title: AdZeroList - AdBlock Format"
-    echo "! Description: Automatically generated blocklist combining DNS and AdBlock sources"
+    echo "! Description: Comprehensive blocklist for AdBlock Plus, Brave, and compatible adblockers"
     echo "! Homepage: https://github.com/eikarna/AdZeroList"
     echo "! Expires: 1 day"
     echo "! Version: $(date +%Y%m%d%H%M%S)"
+    echo "! Total rules: $ADBLOCK_COUNT"
     echo "!"
-    cat "$ADBLOCK_PROCESSED"
+    cat "$TEMP_ADBLOCK_PROCESSED"
 } > "$OUTPUT_ADBLOCK"
 
 # uBlock Origin format
+echo "  📄 Generating ublock.txt..."
 {
     echo "! Title: AdZeroList - uBlock Origin Format"
-    echo "! Description: Optimized blocklist for uBlock Origin combining multiple sources"
+    echo "! Description: Comprehensive blocklist optimized for uBlock Origin"
     echo "! Homepage: https://github.com/eikarna/AdZeroList"
     echo "! Expires: 1 day"
     echo "! Version: $(date +%Y%m%d%H%M%S)"
     echo "! License: https://github.com/eikarna/AdZeroList/blob/main/LICENSE"
+    echo "! Total rules: $ADBLOCK_COUNT"
     echo "!"
-    cat "$ADBLOCK_PROCESSED"
+    cat "$TEMP_ADBLOCK_PROCESSED"
 } > "$OUTPUT_UBLOCK"
 
-echo "INFO: Enhanced processing complete. All optimized formats generated."
-echo "INFO: DNS formats use $(wc -l < "$DNS_PROCESSED") unique domains"
-echo "INFO: AdBlock formats use $(wc -l < "$ADBLOCK_PROCESSED") unique rules"
-echo "INFO: Generated formats:"
-echo "  - hosts.txt (compressed)"
-echo "  - hosts-uncompressed.txt"
-echo "  - dnsmasq.conf"
-echo "  - smartdns.conf"
-echo "  - bind-rpz.conf"
-echo "  - blocky.txt"
-echo "  - unbound.conf"
-echo "  - adblock.txt"
-echo "  - ublock.txt"
+# Final summary
+echo ""
+echo "✅ Build completed successfully!"
+echo ""
+echo "📊 Final Statistics:"
+echo "   • DNS domains processed: $DOMAIN_COUNT"
+echo "   • AdBlock rules generated: $ADBLOCK_COUNT"
+echo "   • Output formats: 9"
+echo ""
+echo "📁 Generated files:"
+for file in "$OUTPUT_UNCOMPRESSED" "$OUTPUT_COMPRESSED" "$OUTPUT_DNSMASQ" "$OUTPUT_SMARTDNS" "$OUTPUT_BIND" "$OUTPUT_BLOCKY" "$OUTPUT_UNBOUND" "$OUTPUT_ADBLOCK" "$OUTPUT_UBLOCK"; do
+    if [ -f "$file" ]; then
+        size=$(wc -l < "$file")
+        echo "   ✅ $file ($size lines)"
+    else
+        echo "   ❌ $file (failed to generate)"
+    fi
+done
+echo ""
+echo "🎯 Ready for deployment!"

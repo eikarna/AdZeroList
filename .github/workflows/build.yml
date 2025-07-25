@@ -1,0 +1,105 @@
+name: Build and Update Blocklists
+
+on:
+  schedule:
+    # Run daily at 02:00 UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    # Allow manual triggering
+  push:
+    branches: [ main ]
+    paths: 
+      - 'lists/**'
+      - 'scripts/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GH_TOKEN }}
+        
+    - name: Set up environment
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y curl wget
+        
+    - name: Create outputs directory
+      run: mkdir -p outputs
+        
+    - name: Download and combine sources
+      run: |
+        cd scripts
+        chmod +x hostpress-enhanced.sh
+        ./hostpress-enhanced.sh
+        
+    - name: Move outputs to outputs directory
+      run: |
+        # Move all generated files to outputs directory
+        mv scripts/hosts.txt outputs/ 2>/dev/null || true
+        mv scripts/hosts-uncompressed.txt outputs/ 2>/dev/null || true
+        mv scripts/dnsmasq.conf outputs/ 2>/dev/null || true
+        mv scripts/smartdns.conf outputs/ 2>/dev/null || true
+        mv scripts/bind-rpz.conf outputs/ 2>/dev/null || true
+        mv scripts/blocky.yml outputs/ 2>/dev/null || true
+        mv scripts/unbound.conf outputs/ 2>/dev/null || true
+        mv scripts/adblock.txt outputs/ 2>/dev/null || true
+        mv scripts/ublock.txt outputs/ 2>/dev/null || true
+        
+    - name: Generate README for outputs
+      run: |
+        cat > outputs/README.md << 'EOF'
+        # AdZeroList - Generated Blocklists
+        
+        **Last Updated:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+        
+        ## Direct Download Links
+        
+        ### DNS Server Formats
+        - **Hosts format**: [hosts.txt](hosts.txt)
+        - **Hosts uncompressed**: [hosts-uncompressed.txt](hosts-uncompressed.txt)
+        - **Dnsmasq**: [dnsmasq.conf](dnsmasq.conf)
+        - **SmartDNS**: [smartdns.conf](smartdns.conf)
+        - **BIND RPZ**: [bind-rpz.conf](bind-rpz.conf)
+        - **Blocky**: [blocky.yml](blocky.yml)
+        - **Unbound**: [unbound.conf](unbound.conf)
+        
+        ### Browser Adblocker Formats
+        - **AdBlock Plus/Brave**: [adblock.txt](adblock.txt)
+        - **uBlock Origin**: [ublock.txt](ublock.txt)
+        
+        ## Usage in Brave Browser
+        
+        1. Go to `brave://settings/shields/filters`
+        2. Click "Add" under "Custom filter lists"
+        3. Enter this URL: `https://raw.githubusercontent.com/eikarna/AdZeroList/main/outputs/adblock.txt`
+        4. Click "Add"
+        
+        ## Usage in uBlock Origin
+        
+        1. Open uBlock Origin dashboard
+        2. Go to "Filter lists" tab
+        3. Scroll to "Custom" section
+        4. Click "Import..." and enter: `https://raw.githubusercontent.com/eikarna/AdZeroList/main/outputs/ublock.txt`
+        
+        ## Statistics
+        
+        - **Total blocked domains**: $(wc -l < hosts.txt 2>/dev/null || echo "N/A")
+        - **Build date**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+        - **Source**: [AdZeroList Repository](https://github.com/eikarna/AdZeroList)
+        EOF
+        
+    - name: Commit and push changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add outputs/
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "🤖 Auto-update blocklists - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          git push
+        fi
