@@ -1,0 +1,34 @@
+# Custom AdBlock filters
+# Add your own custom AdBlock Plus/uBlock Origin filter rules here
+# Supports all standard AdBlock syntax including:
+# - Domain blocking: ||example.com^
+# - URL blocking: /ads.js
+# - Element hiding: ##.advertisement
+# - Advanced rules: ||example.com^$third-party
+
+# Example custom filters (remove or modify as needed):
+# ||analytics.google.com^$third-party
+# ##.cookie-banner
+# /doubleclick.net/ads/*
+
+# Add your custom filters below this line:
+! Optimized rules (domain-based grouping)
+v1.animasu.top##.wrapper > .bixbox > .listupd > .lmd-iklan
+v1.animasu.top###post-222643 > .listupd
+v1.animasu.top##.listupd:nth-of-type(5)
+
+! Cloudflare exceptions (simplified)
+@@||cloudflare.com^$all
+@@||cloudflare-dns.com^$all
+@@||cloudflareinsights.com^$all
+@@||cloudflarestream.com^$all
+
+! Yandex metric blocker
+||appmetrica.yandex.ru^$all
+
+! Doujindesu.tv ads (optimized with wildcard)
+doujindesu.tv##.blox.mlb.kln
+
+! General ad patterns
+/pagead.
+/widget/ads.

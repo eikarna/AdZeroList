@@ -1,0 +1,56 @@
+# AdBlock-specific filter sources optimized for browser extensions
+# These sources provide native AdBlock filter rules for maximum effectiveness
+# Curated for comprehensive ad blocking, privacy protection, and security
+
+# === Core Ad Blocking ===
+# EasyList - Primary ad blocking filter (most important)
+https://easylist.to/easylist/easylist.txt
+
+# EasyPrivacy - Privacy protection and tracking prevention
+https://easylist.to/easylist/easyprivacy.txt
+
+# === uBlock Origin Filters ===
+# uBlock filters - Core uBlock Origin filters
+https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.txt
+
+# uBlock Privacy - Privacy-focused filters
+https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/privacy.txt
+
+# uBlock Badware - Malware and badware protection
+https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/badware.txt
+
+# uBlock Resource Abuse - Cryptomining and resource abuse
+https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/resource-abuse.txt
+
+# === AdGuard Filters ===
+# AdGuard Base Filter - High-quality ad blocking
+https://raw.githubusercontent.com/AdguardTeam/AdguardFilters/master/BaseFilter/sections/adservers.txt
+
+# AdGuard Tracking Protection - Privacy protection
+https://raw.githubusercontent.com/AdguardTeam/AdguardFilters/master/TrackParamFilter/sections/general_url.txt
+
+# === Annoyance and Social ===
+# Fanboy's Annoyance List - Cookie notices, social widgets
+https://easylist.to/easylist/fanboy-annoyance.txt
+
+# Fanboy's Social Blocking - Social media widgets
+https://easylist.to/easylist/fanboy-social.txt
+
+# === Security Filters ===
+# Malware Domain List - Security protection
+https://raw.githubusercontent.com/hectorm/hmirror/master/data/adblock-nocoin-list/list.txt
+
+# Phishing URL Blocklist - Anti-phishing
+https://raw.githubusercontent.com/AdguardTeam/AdguardFilters/master/PhishingFilter/sections/phishing_url.txt
+
+# === Regional Optimization ===
+# EasyList Germany - German language optimization
+https://easylist.to/easylist/easylistgermany.txt
+
+# === Mobile Optimization ===
+# AdGuard Mobile Ads - Mobile-specific ad blocking
+https://raw.githubusercontent.com/AdguardTeam/AdguardFilters/master/MobileFilter/sections/adservers.txt
+
+# === OISD ===
+# Big Version
+https://big.oisd.nl

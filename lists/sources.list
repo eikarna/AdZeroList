@@ -1,8 +1,6 @@
-# List of hosts source URLs.
-# Add new URLs here, one per line.
-https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling/hosts
-https://adaway.org/hosts.txt
-https://raw.githubusercontent.com/badmojr/1Hosts/master/Lite/hosts.txt
-https://raw.githubusercontent.com/hagezi/dns-blocklists/main/hosts/pro-compressed.txt
-https://raw.githubusercontent.com/r-a-y/mobile-hosts/master/AdguardDNS.txt
-https://raw.githubusercontent.com/jerryn70/GoodbyeAds/master/Hosts/GoodbyeAds.txt
+# Legacy hosts sources (maintained for backward compatibility)
+# These sources are automatically included in DNS formats
+# For better control, use sources-dns.list instead
+
+# StevenBlack's hosts - Unified hosts (fallback)
+https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts

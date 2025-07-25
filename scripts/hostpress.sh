@@ -1,3 +1,12 @@
+# DEPRECATED - Use hostpress-enhanced.sh instead
+
+This script is deprecated. Please use `hostpress-enhanced.sh` for production use.
+
+The enhanced script provides:
+- Format-specific source optimization
+- Custom filter support
+- All 9 output formats
+- Better performance and reliability
 #!/bin/bash
 #
 # hostpress.sh - Script to filter, deduplicate, compress, and generate various hosts file formats.

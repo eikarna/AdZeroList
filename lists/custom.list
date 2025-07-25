@@ -1,4 +1,11 @@
-# List of custom domains to block.
-# Add new domains here, one per line.
-analytics.s3.amazonaws.com
-events3alt.adcolony.com
+# Custom domains to block at DNS level
+# Add domains here that you want to block across all DNS formats
+# One domain per line, no protocol (http/https) needed
+# These will be added to hosts, dnsmasq, smartdns, BIND, Blocky, and Unbound formats
+
+# Examples of domains you might want to block:
+# analytics.example.com
+# tracking.example.com
+# ads.example.com
+
+# Add your custom domains below this line:

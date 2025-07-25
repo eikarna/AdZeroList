@@ -1,6 +1,11 @@
-# List of domains to be excluded (whitelist).
-# Domains listed here will be removed from the final hosts file.
-# Add one domain per line.
-# Example:
-# example.com
-# anotherexample.org
+# Whitelist - Domains to exclude from blocking
+# Domains listed here will be removed from all generated blocklists
+# Use this to prevent blocking of essential services or false positives
+# Add one domain per line
+
+# Common domains you might need to whitelist:
+# accounts.google.com
+# login.microsoftonline.com
+# auth.services.adobe.com
+
+# Add your whitelisted domains below this line:

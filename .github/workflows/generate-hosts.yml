@@ -18,49 +18,28 @@ jobs:
 
       - name: Download host sources
         run: |
-          echo "INFO: Downloading from active sources in sources.list..."
-          # Filter lines starting with '#' or empty lines, then download
-          grep -vE '^\s*(#|$)' lists/sources.list | wget -i - -O hosts.raw
-          echo "INFO: Download complete."
+          echo "INFO: Enhanced processing will handle source downloads..."
+          # Create empty file for compatibility
+          touch hosts.raw
 
       - name: Add custom domains
         run: |
-          echo "INFO: Adding custom domains from custom.list..."
-          if [ -s lists/custom.list ]; then
-            # FIX: Ensure there's a newline before adding custom domains
-            echo "" >> hosts.raw
-            while IFS= read -r domain; do
-              # Ensure line is not empty and not a comment
-              if [[ -n "$domain" && ! "$domain" =~ ^\s*# ]]; then
-                echo "0.0.0.0 $domain" >> hosts.raw
-              fi
-            done < lists/custom.list
-            echo "INFO: Custom domains added."
-          else
-            echo "INFO: lists/custom.list is empty. Skipping."
-          fi
+          echo "INFO: Enhanced script will handle custom domains automatically..."
 
-      - name: Make script executable
-        run: chmod +x scripts/hostpress.sh
+      - name: Make scripts executable
+        run: |
+          chmod +x scripts/hostpress.sh
+          chmod +x scripts/hostpress-enhanced.sh
 
       - name: Apply whitelist to raw hosts
         run: |
-          echo "INFO: Applying whitelist from custom-white.list to hosts.raw..."
-          if [ -s lists/custom-white.list ]; then
-            # Remove lines containing domains from the whitelist
-            # -f option reads patterns from a file, -v inverts the match
-            grep -v -f lists/custom-white.list hosts.raw > hosts.raw.whitelisted
-            mv hosts.raw.whitelisted hosts.raw
-            echo "INFO: Whitelist applied to hosts.raw."
-          else
-            echo "INFO: lists/custom-white.list is empty. Skipping whitelist application."
-          fi
+          echo "INFO: Enhanced script will handle whitelist automatically..."
 
-      - name: Run hostpress script to process hosts
+      - name: Run enhanced hostpress script
         run: |
-          echo "INFO: Starting host processing with Bash script..."
-          ./scripts/hostpress.sh hosts.raw
-          echo "INFO: Host processing finished. Generated multiple output files."
+          echo "INFO: Starting enhanced host processing..."
+          ./scripts/hostpress-enhanced.sh
+          echo "INFO: Enhanced host processing finished."
 
       - name: Get previous hosts.txt hash
         id: old_hash
@@ -89,6 +68,9 @@ jobs:
             hosts-uncompressed.txt
             dnsmasq.conf
             smartdns.conf
+            bind-rpz.conf
+            blocky.txt
+            unbound.conf
             adblock.txt
             ublock.txt
           tag_name: latest
