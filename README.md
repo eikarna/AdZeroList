@@ -1,13 +1,13 @@
 # AdZeroList: Automated Hosts File Generator
 
-[![Build Status](https://github.com/eikarna/AdZeroList/workflows/Generate%20Compressed%20Hosts%20File/badge.svg)](https://github.com/eikarna/AdZeroList/actions?query=workflow%3A%22Generate+Compressed+Hosts+File%22)
+[![Build Status](https://github.com/eikarna/AdZeroList/workflows/Build%20and%20Deploy%20Blocklists/badge.svg)](https://github.com/eikarna/AdZeroList/actions/workflows/unified-build.yml)
 [![Latest Release](https://img.shields.io/github/v/release/eikarna/AdZeroList?label=latest%20release)](https://github.com/eikarna/AdZeroList/releases/latest)
 
 Welcome to **AdZeroList**! This repository is your go-to solution for automatically generating clean, compressed, and deduplicated `hosts` files. Powered by GitHub Actions, our process ensures your `hosts` file is always up-to-date, providing you with a seamless ad-blocking experience.
 
 ## ✨ Features
 
--   **Automated & Always Fresh**: Our blocklists are automatically generated every 3 hours via GitHub Actions, ensuring you always have the latest protection without any manual intervention.
+-   **Automated & Always Fresh**: Our blocklists are automatically generated daily at 02:00 UTC via GitHub Actions, ensuring you always have the latest protection without any manual intervention.
 -   **Production-Ready Sources**: Curated with the best source combinations - Hagezi Pro++, 1Hosts Pro, comprehensive AdBlock filters, and security-focused lists.
 -   **Format-Optimized Sources**: Uses dedicated source lists optimized for each format - DNS-level sources for hosts/dnsmasq/smartdns/BIND/Blocky/Unbound, and specialized filter sources for adblocker formats.
 -   **Multiple Format Support**: Generate blocklists in 9 different formats including traditional `hosts` files, DNS server configs, and adblocker formats.
@@ -112,7 +112,7 @@ This allows you to quickly see if the `hosts.txt` content has changed between re
 
 ## 🔧 How It Works
 
-1.  **Trigger**: Our GitHub Actions workflow is triggered daily at 00:00 UTC, or whenever there's a `push` to the `main` branch, ensuring continuous updates.
+1.  **Trigger**: Our GitHub Actions workflow is triggered daily at 02:00 UTC, or whenever there's a `push` to the `main` branch, ensuring continuous updates.
 2.  **Compilation**: The `hostpress.c` program, the core of our processing, is compiled using `Makefile`.
 3.  **Download Sources**: All active (uncommented) URLs listed in `sources.list` are downloaded to gather the latest blocklist data.
 4.  **Customization**: Domains specified in `custom.list` are seamlessly integrated into the blocklist.

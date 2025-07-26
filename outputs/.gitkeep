@@ -1,3 +1,2 @@
-# Placeholder file
-# This file will be replaced by the automated build process
-# Generated blocklists will appear here after the first successful build
+# This file ensures the outputs directory is preserved in git
+# Generated blocklist files will be placed here by GitHub Actions

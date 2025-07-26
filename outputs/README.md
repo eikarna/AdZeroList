@@ -1,6 +1,6 @@
 # AdZeroList - Generated Blocklists
 
-This directory contains the automatically generated blocklist files in various formats.
+**Last Updated:** Auto-updated daily via GitHub Actions
 
 ## 🔗 Direct Download Links
 
@@ -35,11 +35,12 @@ This directory contains the automatically generated blocklist files in various f
 Choose the appropriate format for your DNS server and download the corresponding file.
 
 ## 📊 Statistics
-- **Last Updated**: Auto-updated daily via GitHub Actions
+- **Last Updated**: Will be updated automatically by the next workflow run
 - **Source**: [AdZeroList Repository](https://github.com/eikarna/AdZeroList)
-- **Build Status**: [![Build](https://github.com/eikarna/AdZeroList/actions/workflows/build.yml/badge.svg)](https://github.com/eikarna/AdZeroList/actions/workflows/build.yml)
+- **Build Status**: [![Build](https://github.com/eikarna/AdZeroList/actions/workflows/unified-build.yml/badge.svg)](https://github.com/eikarna/AdZeroList/actions/workflows/unified-build.yml)
 
 ## ⚠️ Important Notes
 - Files are updated daily at 02:00 UTC
 - Use `raw.githubusercontent.com` links for direct access (better compatibility)
 - GitHub releases may have compatibility issues with some browsers/downloaders
+- The `.gitkeep` file ensures this directory structure is preserved during repository operations

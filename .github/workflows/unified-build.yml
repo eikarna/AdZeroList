@@ -1,4 +1,4 @@
-name: Build and Update Blocklists
+name: Build and Deploy Blocklists
 
 on:
   schedule:
@@ -11,9 +11,10 @@ on:
     paths: 
       - 'lists/**'
       - 'scripts/**'
+      - '.github/workflows/**'
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     
     steps:
@@ -21,6 +22,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         token: ${{ secrets.GH_TOKEN }}
+        fetch-depth: 2  # Fetch last 2 commits for hash comparison
         
     - name: Set up environment
       run: |
@@ -51,10 +53,14 @@ jobs:
         
     - name: Generate README for outputs
       run: |
-        cat > outputs/README.md << 'EOF'
+        # Get current date and domain count
+        CURRENT_DATE=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+        DOMAIN_COUNT=$(wc -l < outputs/hosts.txt 2>/dev/null || echo "N/A")
+        
+        cat > outputs/README.md << EOF
         # AdZeroList - Generated Blocklists
         
-        **Last Updated:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+        **Last Updated:** ${CURRENT_DATE}
         
         ## Direct Download Links
         
@@ -73,9 +79,9 @@ jobs:
         
         ## Usage in Brave Browser
         
-        1. Go to `brave://settings/shields/filters`
+        1. Go to \`brave://settings/shields/filters\`
         2. Click "Add" under "Custom filter lists"
-        3. Enter this URL: `https://raw.githubusercontent.com/eikarna/AdZeroList/main/outputs/adblock.txt`
+        3. Enter this URL: \`https://raw.githubusercontent.com/eikarna/AdZeroList/main/outputs/adblock.txt\`
         4. Click "Add"
         
         ## Usage in uBlock Origin
@@ -83,14 +89,30 @@ jobs:
         1. Open uBlock Origin dashboard
         2. Go to "Filter lists" tab
         3. Scroll to "Custom" section
-        4. Click "Import..." and enter: `https://raw.githubusercontent.com/eikarna/AdZeroList/main/outputs/ublock.txt`
+        4. Click "Import..." and enter: \`https://raw.githubusercontent.com/eikarna/AdZeroList/main/outputs/ublock.txt\`
         
         ## Statistics
         
-        - **Total blocked domains**: $(wc -l < hosts.txt 2>/dev/null || echo "N/A")
-        - **Build date**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+        - **Total blocked domains**: ${DOMAIN_COUNT}
+        - **Build date**: ${CURRENT_DATE}
         - **Source**: [AdZeroList Repository](https://github.com/eikarna/AdZeroList)
         EOF
+
+    - name: Get previous hosts.txt hash
+      id: old_hash
+      run: |
+        OLD_HASH=$(git show HEAD~1:outputs/hosts.txt 2>/dev/null | sha256sum | awk '{print $1}' || echo "N/A")
+        echo "value=$OLD_HASH" >> $GITHUB_OUTPUT
+
+    - name: Get new hosts.txt hash
+      id: new_hash
+      run: |
+        NEW_HASH=$(sha256sum outputs/hosts.txt | awk '{print $1}' 2>/dev/null || echo "N/A")
+        echo "value=$NEW_HASH" >> $GITHUB_OUTPUT
+
+    - name: Get current date for release
+      id: date
+      run: echo "date=AZL - $(date +'%H:%M:%S %Z (%A, %d %b %Y)')" >> $GITHUB_OUTPUT
         
     - name: Commit and push changes
       run: |
@@ -99,7 +121,36 @@ jobs:
         git add outputs/
         if git diff --staged --quiet; then
           echo "No changes to commit"
+          echo "CHANGES_MADE=false" >> $GITHUB_ENV
         else
           git commit -m "🤖 Auto-update blocklists - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
           git push
+          echo "CHANGES_MADE=true" >> $GITHUB_ENV
         fi
+
+    - name: Create Release and Upload Assets
+      if: env.CHANGES_MADE == 'true'
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          outputs/hosts.txt
+          outputs/hosts-uncompressed.txt
+          outputs/dnsmasq.conf
+          outputs/smartdns.conf
+          outputs/bind-rpz.conf
+          outputs/blocky.yml
+          outputs/unbound.conf
+          outputs/adblock.txt
+          outputs/ublock.txt
+        tag_name: latest
+        name: ${{ steps.date.outputs.date }}
+        body: |
+          Automated hosts file build.
+          Triggered by: ${{ github.event_name }}
+          Commit: \`${{ github.sha }}\`
+          ---
+          hosts.txt Hashes:
+          Old: ${{ steps.old_hash.outputs.value }}
+          New: ${{ steps.new_hash.outputs.value }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
