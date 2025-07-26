@@ -1,24 +1,8 @@
 # DNS-level sources optimized for hosts, dnsmasq, smartdns, BIND, Blocky, and Unbound
-# These sources provide domain lists optimized for DNS-level blocking
 # Curated for maximum effectiveness with minimal false positives
 
-# Hagezi DNS Blocklist - Pro++ (Most comprehensive, highly maintained)
-https://raw.githubusercontent.com/hagezi/dns-blocklists/main/hosts/pro.plus.txt
+# Hagezi DNS Blocklist - Pro (Comprehensive and well-maintained, less aggressive than Pro++)
+https://raw.githubusercontent.com/hagezi/dns-blocklists/main/hosts/pro.txt
 
-# 1Hosts Pro - High-quality curated list
-https://raw.githubusercontent.com/badmojr/1Hosts/master/Pro/hosts.txt
-
-# StevenBlack's hosts - Unified hosts + adware + malware + fakenews + gambling
-https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling/hosts
-
-# AdAway - Mobile-focused blocking
-https://adaway.org/hosts.txt
-
-# GoodbyeAds - Samsung + Xiaomi + LG Smart TV ads
-https://raw.githubusercontent.com/jerryn70/GoodbyeAds/master/Hosts/GoodbyeAds.txt
-
-# Phishing Army - Anti-phishing protection
-https://phishing.army/download/phishing_army_blocklist_extended.txt
-
-# URLHaus - Malware URL blocking
-https://urlhaus.abuse.ch/downloads/hostfile/
+# StevenBlack's hosts - Unified hosts + adware + malware (Optional, enable if you want another layer)
+# https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
