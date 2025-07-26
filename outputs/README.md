@@ -1,46 +1,38 @@
 # AdZeroList - Generated Blocklists
 
-**Last Updated:** Auto-updated daily via GitHub Actions
+**Last Updated:** 2025-07-26 00:19:37 UTC
 
-## 🔗 Direct Download Links
+## Direct Download Links
 
 ### DNS Server Formats
-- **Hosts format**: [hosts.txt](https://raw.githubusercontent.com/eikarna/AdZeroList/main/outputs/hosts.txt)
-- **Hosts uncompressed**: [hosts-uncompressed.txt](https://raw.githubusercontent.com/eikarna/AdZeroList/main/outputs/hosts-uncompressed.txt)
-- **Dnsmasq**: [dnsmasq.conf](https://raw.githubusercontent.com/eikarna/AdZeroList/main/outputs/dnsmasq.conf)
-- **SmartDNS**: [smartdns.conf](https://raw.githubusercontent.com/eikarna/AdZeroList/main/outputs/smartdns.conf)
-- **BIND RPZ**: [bind-rpz.conf](https://raw.githubusercontent.com/eikarna/AdZeroList/main/outputs/bind-rpz.conf)
-- **Blocky**: [blocky.yml](https://raw.githubusercontent.com/eikarna/AdZeroList/main/outputs/blocky.yml)
-- **Unbound**: [unbound.conf](https://raw.githubusercontent.com/eikarna/AdZeroList/main/outputs/unbound.conf)
+- **Hosts format**: [hosts.txt](hosts.txt)
+- **Hosts uncompressed**: [hosts-uncompressed.txt](hosts-uncompressed.txt)
+- **Dnsmasq**: [dnsmasq.conf](dnsmasq.conf)
+- **SmartDNS**: [smartdns.conf](smartdns.conf)
+- **BIND RPZ**: [bind-rpz.conf](bind-rpz.conf)
+- **Blocky**: [blocky.yml](blocky.yml)
+- **Unbound**: [unbound.conf](unbound.conf)
 
 ### Browser Adblocker Formats
-- **AdBlock Plus/Brave**: [adblock.txt](https://raw.githubusercontent.com/eikarna/AdZeroList/main/outputs/adblock.txt)
-- **uBlock Origin**: [ublock.txt](https://raw.githubusercontent.com/eikarna/AdZeroList/main/outputs/ublock.txt)
+- **AdBlock Plus/Brave**: [adblock.txt](adblock.txt)
+- **uBlock Origin**: [ublock.txt](ublock.txt)
 
-## 🚀 Quick Setup
+## Usage in Brave Browser
 
-### Brave Browser
 1. Go to `brave://settings/shields/filters`
 2. Click "Add" under "Custom filter lists"
-3. Enter: `https://raw.githubusercontent.com/eikarna/AdZeroList/main/outputs/adblock.txt`
+3. Enter this URL: `https://raw.githubusercontent.com/eikarna/AdZeroList/main/outputs/adblock.txt`
 4. Click "Add"
 
-### uBlock Origin
+## Usage in uBlock Origin
+
 1. Open uBlock Origin dashboard
 2. Go to "Filter lists" tab
 3. Scroll to "Custom" section
 4. Click "Import..." and enter: `https://raw.githubusercontent.com/eikarna/AdZeroList/main/outputs/ublock.txt`
 
-### DNS Servers
-Choose the appropriate format for your DNS server and download the corresponding file.
+## Statistics
 
-## 📊 Statistics
-- **Last Updated**: Will be updated automatically by the next workflow run
+- **Total blocked domains**: 126409
+- **Build date**: 2025-07-26 00:19:37 UTC
 - **Source**: [AdZeroList Repository](https://github.com/eikarna/AdZeroList)
-- **Build Status**: [![Build](https://github.com/eikarna/AdZeroList/actions/workflows/unified-build.yml/badge.svg)](https://github.com/eikarna/AdZeroList/actions/workflows/unified-build.yml)
-
-## ⚠️ Important Notes
-- Files are updated daily at 02:00 UTC
-- Use `raw.githubusercontent.com` links for direct access (better compatibility)
-- GitHub releases may have compatibility issues with some browsers/downloaders
-- The `.gitkeep` file ensures this directory structure is preserved during repository operations
