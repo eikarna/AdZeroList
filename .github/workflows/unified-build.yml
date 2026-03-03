@@ -1,0 +1,140 @@
+name: Build and Deploy Blocklists
+
+on:
+  schedule:
+    # Run daily at 02:00 UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    # Allow manual triggering
+  push:
+    branches: [ main ]
+    paths: 
+      - 'lists/**'
+      - 'scripts/**'
+      - '.github/workflows/**'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GH_TOKEN }}
+        fetch-depth: 2  # Fetch last 2 commits for hash comparison
+        
+    - name: Set up environment
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y curl wget
+        
+    - name: Download and combine sources
+      run: |
+        cd scripts
+        chmod +x hostpress.sh
+        ./hostpress.sh
+        
+    - name: Generate README for output info
+      run: |
+        # Get current date and domain count
+        CURRENT_DATE=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+        DOMAIN_COUNT=$(wc -l < scripts/hosts.txt 2>/dev/null || echo "N/A")
+        
+        cat > outputs/README.md << EOF
+        # AdZeroList - Generated Blocklists
+        
+        **Last Updated:** ${CURRENT_DATE}
+        
+        ## Direct Download Links
+        
+        ### DNS Server Formats
+        - **Hosts format**: [hosts.txt](hosts.txt)
+        - **Hosts uncompressed**: [hosts-uncompressed.txt](hosts-uncompressed.txt)
+        - **Dnsmasq**: [dnsmasq.conf](dnsmasq.conf)
+        - **SmartDNS**: [smartdns.conf](smartdns.conf)
+        - **BIND RPZ**: [bind-rpz.conf](bind-rpz.conf)
+        - **Blocky**: [blocky.yml](blocky.yml)
+        - **Unbound**: [unbound.conf](unbound.conf)
+        
+        ### Browser Adblocker Formats
+        - **AdBlock Plus/Brave**: [adblock.txt](adblock.txt)
+        - **uBlock Origin**: [ublock.txt](ublock.txt)
+        
+        ## Usage in Brave Browser
+        
+        1. Go to \`brave://settings/shields/filters\`
+        2. Click "Add" under "Custom filter lists"
+        3. Enter this URL: \`https://github.com/eikarna/AdZeroList/releases/download/latest/adblock.txt\`
+        4. Click "Add"
+        
+        ## Usage in uBlock Origin
+        
+        1. Open uBlock Origin dashboard
+        2. Go to "Filter lists" tab
+        3. Scroll to "Custom" section
+        4. Click "Import..." and enter: \`https://github.com/eikarna/AdZeroList/releases/download/latest/ublock.txt\`
+        
+        ## Statistics
+        
+        - **Total blocked domains**: ${DOMAIN_COUNT}
+        - **Build date**: ${CURRENT_DATE}
+        - **Source**: [AdZeroList Repository](https://github.com/eikarna/AdZeroList)
+        EOF
+
+    - name: Get previous hosts.txt hash
+      id: old_hash
+      run: |
+        OLD_HASH=$(git show HEAD~1:scripts/hosts.txt 2>/dev/null | sha256sum | awk '{print $1}' || echo "N/A")
+        echo "value=$OLD_HASH" >> $GITHUB_OUTPUT
+
+    - name: Get new hosts.txt hash
+      id: new_hash
+      run: |
+        NEW_HASH=$(sha256sum scripts/hosts.txt | awk '{print $1}' 2>/dev/null || echo "N/A")
+        echo "value=$NEW_HASH" >> $GITHUB_OUTPUT
+
+    - name: Get current date for release
+      id: date
+      run: echo "date=AZL - $(date +'%H:%M:%S %Z (%A, %d %b %Y)')" >> $GITHUB_OUTPUT
+        
+    - name: Commit and push changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add outputs/
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+          echo "CHANGES_MADE=false" >> $GITHUB_ENV
+        else
+          git commit -m "🤖 Auto-update blocklists info - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          git push
+          echo "CHANGES_MADE=true" >> $GITHUB_ENV
+        fi
+
+    - name: Create Release and Upload Assets
+      if: env.CHANGES_MADE == 'true'
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          scripts/hosts.txt
+          scripts/hosts-uncompressed.txt
+          scripts/dnsmasq.conf
+          scripts/smartdns.conf
+          scripts/bind-rpz.conf
+          scripts/blocky.yml
+          scripts/unbound.conf
+          scripts/adblock.txt
+          scripts/ublock.txt
+        tag_name: latest
+        name: ${{ steps.date.outputs.date }}
+        body: |
+          Automated hosts file build.
+          Triggered by: ${{ github.event_name }}
+          Commit: \`${{ github.sha }}\`
+          ---
+          hosts.txt Hashes:
+          Old: ${{ steps.old_hash.outputs.value }}
+          New: ${{ steps.new_hash.outputs.value }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

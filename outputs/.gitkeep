@@ -1,0 +1,2 @@
+# This file ensures the outputs directory is preserved in git
+# Generated blocklist files will be placed here by GitHub Actions

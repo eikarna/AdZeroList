@@ -1,0 +1,6 @@
+# Legacy hosts sources (maintained for backward compatibility)
+# These sources are automatically included in DNS formats
+# For better control, use sources-dns.list instead
+
+# StevenBlack's hosts - Unified hosts (fallback)
+https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts

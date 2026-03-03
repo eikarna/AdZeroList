@@ -1,0 +1,11 @@
+# Whitelist - Domains to exclude from blocking
+# Domains listed here will be removed from all generated blocklists
+# Use this to prevent blocking of essential services or false positives
+# Add one domain per line
+
+# Common domains you might need to whitelist:
+# accounts.google.com
+# login.microsoftonline.com
+# auth.services.adobe.com
+
+# Add your whitelisted domains below this line:
