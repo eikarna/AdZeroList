@@ -18,7 +18,7 @@ trap 'rm -rf "$TEMP_DIR"' EXIT
 
 # Source lists
 DNS_SOURCES="$LISTS_DIR/sources-dns.list"
-ADBLOCK_SOURCES="$LISTS_DIR/sources-adblock.list" 
+ADBLOCK_SOURCES="$LISTS_DIR/sources-adblock.list"
 LEGACY_SOURCES="$LISTS_DIR/sources.list"
 CUSTOM_DOMAINS="$LISTS_DIR/custom.list"
 CUSTOM_ADBLOCK="$LISTS_DIR/custom-adblock.list"
@@ -285,12 +285,12 @@ ADBLOCK_COUNT=$(wc -l < "$TEMP_ADBLOCK_PROCESSED")
 # AdBlock Plus/Brave format
 echo "  📄 Generating adblock.txt..."
 {
-    echo "[Adblock Plus]"
+    echo "[Adblock Plus 2.0]"
     echo "! Title: AdZeroList - ABP"
     echo "! Description: Comprehensive blocklist for AdBlock Plus, Brave, and compatible adblockers"
     echo "! Homepage: https://github.com/eikarna/AdZeroList"
     echo "! Expires: 1 day"
-    echo "! Version: $(date +%Y%m%d%H%M%S)"
+    echo "! Version: $(date +%Y%m%d%H%M)"
     echo "! Entries: $ADBLOCK_COUNT"
     echo "! Maintainer: eikarna"
     echo "!"
@@ -304,7 +304,7 @@ echo "  📄 Generating ublock.txt..."
     echo "! Description: Comprehensive blocklist optimized for uBlock Origin"
     echo "! Homepage: https://github.com/eikarna/AdZeroList"
     echo "! Expires: 1 day"
-    echo "! Version: $(date +%Y%m%d%H%M%S)"
+    echo "! Version: $(date +%Y%m%d%H%M)"
     echo "! License: https://github.com/eikarna/AdZeroList/blob/main/LICENSE"
     echo "! Total rules: $ADBLOCK_COUNT"
     echo "! Maintainer: eikarna"
