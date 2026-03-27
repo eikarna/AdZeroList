@@ -101,14 +101,17 @@ jobs:
         
     - name: Commit and push changes
       run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
+        # CONFIGURATION FOR YOUR ACCOUNT
+        git config --local user.email "137246570+eikarna@users.noreply.github.com"
+        
+        git config --local user.name "eikarna"
+        
         git add outputs/
         if git diff --staged --quiet; then
           echo "No changes to commit"
           echo "CHANGES_MADE=false" >> $GITHUB_ENV
         else
-          git commit -m "🤖 Auto-update blocklists info - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          git commit -m "Auto-update blocklists info - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
           git push
           echo "CHANGES_MADE=true" >> $GITHUB_ENV
         fi
