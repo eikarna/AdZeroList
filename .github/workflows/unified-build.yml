@@ -16,10 +16,11 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    
+    permissions:
+        contents: write
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         token: ${{ secrets.GH_TOKEN }}
         fetch-depth: 2  # Fetch last 2 commits for hash comparison
