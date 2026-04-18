@@ -1,6 +1,6 @@
 # AdZeroList - Generated Blocklists
 
-**Last Updated:** 2026-04-17 04:46:48 UTC
+**Last Updated:** 2026-04-18 04:30:05 UTC
 
 ## Direct Download Links
 
@@ -33,6 +33,6 @@
 
 ## Statistics
 
-- **Total blocked domains**: 62891
-- **Build date**: 2026-04-17 04:46:48 UTC
+- **Total blocked domains**: 61277
+- **Build date**: 2026-04-18 04:30:05 UTC
 - **Source**: [AdZeroList Repository](https://github.com/eikarna/AdZeroList)
