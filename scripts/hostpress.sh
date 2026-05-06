@@ -227,18 +227,12 @@ ADBLOCK_COUNT=$(wc -l < "$TEMP_DIR/adblock_final.txt")
 {
     echo "[Adblock Plus 2.0]"
     echo "! Title: AdZeroList - ABP"
-    echo "! Expires: 1 day"
-    echo "! Version: $(date +%Y%m%d%H%M)"
-    echo "! Entries: $ADBLOCK_COUNT"
     cat "$TEMP_DIR/adblock_final.txt"
 } > "$OUTPUT_ADBLOCK"
 
 # uBlock Origin
 {
     echo "! Title: AdZeroList - uBlock"
-    echo "! Expires: 1 day"
-    echo "! Version: $(date +%Y%m%d%H%M)"
-    echo "! Total rules: $ADBLOCK_COUNT"
     cat "$TEMP_DIR/adblock_final.txt"
 } > "$OUTPUT_UBLOCK"
 
