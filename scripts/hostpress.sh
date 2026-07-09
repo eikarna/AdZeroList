@@ -165,7 +165,7 @@ ln "$TEMP_UNIQUE" "$OUTPUT_UNCOMPRESSED"
 
 # Hosts Compressed (Multi-domain per line)
 # AWK buffers lines to pack up to 9 domains per IP line
-awk -v max=9 '
+awk -v max=1 '
 {
     if (curr_ip != "" && ($1 != curr_ip || count >= max)) {
         printf "%s", curr_ip;
