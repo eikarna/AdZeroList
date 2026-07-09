@@ -85,16 +85,33 @@ process_file_list() {
     echo "    ✅ $type downloads complete."
 }
 
+# --- AdBlock to Hosts Converter Function ---
+convert_adblock_to_hosts() {
+    local adblock_file="$1"
+    local output_file="$2"
+    
+    echo "🔄 Converting AdBlock format to hosts format..."
+    
+    # Ekstrak domain dari format ||domain^ dan ubah ke 0.0.0.0 domain
+    sed 's/^\|\|//g; s/\^$//g' "$adblock_file" | \
+        grep -v '^[[:space:]]*$' | \
+        awk '{print "0.0.0.0 " $0}' > "$output_file"
+    
+    echo "✅ Conversion complete"
+}
+
 # --- 1. Download Phase ---
-process_file_list "$DNS_SOURCES" "$TEMP_DNS" "DNS"
+process_file_list "$DNS_SOURCES" "$TEMP_DNS.unp" "DNS"
 process_file_list "$ADBLOCK_SOURCES" "$TEMP_ADBLOCK" "AdBlock"
 
 # Add custom domains
 if [[ -f "$CUSTOM_DOMAINS" ]]; then
     echo "📝 Adding custom domains..."
     # Pre-format custom domains to match hosts style for easier processing later
-    sed 's/^/0.0.0.0 /' "$CUSTOM_DOMAINS" >> "$TEMP_DNS"
+    sed 's/^/0.0.0.0 /' "$CUSTOM_DOMAINS" >> "$TEMP_DNS.unp"
 fi
+
+convert_adblock_to_hosts "$TEMP_DNS.unp" "$TEMP_DNS"
 
 # --- 2. Processing Phase (DNS) ---
 echo "🔄 Processing DNS data (Normalization & Deduplication)..."
